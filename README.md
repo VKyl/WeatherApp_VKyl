@@ -22,6 +22,17 @@ All of them are used just to build a specific request URL</p>
 >  "timestamp": end_dt.strftime("%m/%d/%Y, %H:%M:%S"), <br>
 >  "location": location, <br>
 >  "date": date, <br>
->  "weather": weather, <br>
+>  "weather": WeatherType, <br>
 >  "cloth_advice": advice <br>
+> }
+
+>  [!IMPORTANT]
+> WeatherType structure: <br/>
+> { <br/>
+> "temp_c": temerature, <br/>
+> "wind_kph": wind_kph, <br/>
+> "pressure_mb": pressure, <br/>
+> "humidity": humidity, <br/> 
+> "cast_location": location, <br/>
+> "icon": icon <br/> 
 > }
