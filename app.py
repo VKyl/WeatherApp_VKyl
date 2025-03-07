@@ -1,15 +1,38 @@
 import datetime as dt
+import openai
 
 from flask import Flask, jsonify, request
+from dotenv import load_dotenv
 import os
 
 from Types.InvalidUsage import InvalidUsage
 from get_weather import resolve_weather
 
+load_dotenv()
+
 API_TOKEN = os.environ.get("API_TOKEN")
 RSA_KEY = os.environ.get("RSA_KEY")
+OPENAI_API_KEY = os.environ.get("OPENAI_KEY")
 
 app = Flask(__name__)
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
+
+
+def get_advice(weather):
+    prompt = (f"Based on the following weather conditions, "
+              f"suggest what to wear: {weather} Provide a short, practical recommendation.")
+    try:
+        response = client.chat.completions.create(
+            model="omni-moderation-latest",
+            messages=[
+                {"role": "user",
+                 "content": prompt
+                 }]
+        )
+    except Exception as e:
+        return "GPT response went wrong"
+
+    return response["choices"][0]["message"]["content"]
 
 
 @app.errorhandler(InvalidUsage)
@@ -37,9 +60,10 @@ def weather_endpoint():
         raise InvalidUsage("token is required", status_code=400)
 
     if token != API_TOKEN:
-        raise InvalidUsage("wrong API token", status_code=403)
+        raise InvalidUsage(f"wrong API token {token} needed {API_TOKEN}", status_code=403)
 
     weather = resolve_weather(RSA_KEY, location=location, date=date)
+    advice = get_advice(weather)
 
     end_dt = dt.datetime.now()
 
@@ -48,7 +72,8 @@ def weather_endpoint():
         "timestamp": end_dt.strftime("%m/%d/%Y, %H:%M:%S"),
         "location": location,
         "date": date,
-        "weather": weather
+        "weather": weather,
+        "cloth_advice": advice
     }
 
     return result
