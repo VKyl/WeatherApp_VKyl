@@ -23,16 +23,16 @@ def get_advice(weather):
               f"suggest what to wear: {weather} Provide a short, practical recommendation.")
     try:
         response = client.chat.completions.create(
-            model="omni-moderation-latest",
+            model="gpt-3.5-turbo",
             messages=[
                 {"role": "user",
                  "content": prompt
                  }]
         )
     except Exception as e:
-        return "GPT response went wrong"
+        return str(e)
 
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message.content
 
 
 @app.errorhandler(InvalidUsage)
